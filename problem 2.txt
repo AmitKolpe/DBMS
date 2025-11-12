@@ -1,0 +1,63 @@
+CREATE DATABASE BankDB;
+USE BankDB;
+
+
+CREATE TABLE Bank (
+    bank_id INT PRIMARY KEY,
+    bank_name VARCHAR(100) UNIQUE NOT NULL,
+    ho_address VARCHAR(200) NOT NULL,
+    contactno VARCHAR(15) CHECK (LENGTH(contactno) >= 10)
+);
+
+
+CREATE TABLE Branch (
+    branch_id INT PRIMARY KEY,
+    bank_id INT NOT NULL,
+    branch_name VARCHAR(100) NOT NULL,
+    ifsc VARCHAR(20) UNIQUE NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    state VARCHAR(50) NOT NULL,
+    pincode CHAR(6) NOT NULL,
+    FOREIGN KEY (bank_id) REFERENCES Bank(bank_id)
+);
+
+
+CREATE TABLE Customer (
+    customerid INT PRIMARY KEY,
+    fname VARCHAR(50) NOT NULL,
+    mname VARCHAR(50),
+    lname VARCHAR(50) NOT NULL,
+    gender CHAR(1) CHECK (gender IN ('M','F')),
+    dob DATE NOT NULL,
+    phone VARCHAR(15) UNIQUE NOT NULL,
+    create_on DATE DEFAULT (CURRENT_DATE)
+);
+
+
+CREATE TABLE Account (
+    account_id INT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    branch_id INT NOT NULL,
+    account_no VARCHAR(20) UNIQUE NOT NULL,
+    account_type VARCHAR(20) CHECK (account_type IN ('Saving','Current','Salary')),
+    balance DECIMAL(12,2) CHECK (balance >= 0),
+    status VARCHAR(20) DEFAULT 'Active',
+    open_on DATE DEFAULT (CURRENT_DATE),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customerid),
+    FOREIGN KEY (branch_id) REFERENCES Branch(branch_id)
+);
+
+
+ALTER TABLE Customer
+ADD email VARCHAR(120) UNIQUE;
+
+ALTER TABLE Branch
+MODIFY branch_name VARCHAR(120);
+
+
+RENAME TABLE Account TO CustomerAccount;
+
+ALTER TABLE Branch
+CHANGE COLUMN ifsc ifsc_code VARCHAR(20);
+
+CREATE INDEX idx_branch_id ON CustomerAccount(branch_id);
